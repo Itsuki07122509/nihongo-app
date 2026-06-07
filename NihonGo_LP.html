@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FFF8F2">
+<title>NihonGo! — Học tiếng Nhật cho người Việt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Be Vietnam Pro',sans-serif;
+  background:#FFF8F2;
+  color:#1D3557;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── VARIABLES ── */
+:root{
+  --red:#C1121F;
+  --red-light:#FBBCC8;
+  --red-pale:#FFF0EB;
+  --navy:#1D3557;
+  --cream:#FFF8F2;
+  --peach:#FFEEE6;
+  --peach-deep:#FFE4D8;
+  --tan:#B08070;
+  --tan-light:#C8A89A;
+  --border:#F5E8DF;
+  --gold:#F4A261;
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+}
+
+/* ── TOPNAV ── */
+.topnav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,248,242,.96);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1.5px solid var(--border);
+  padding:10px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;
+}
+.nav-logo{
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:20px;font-weight:900;color:var(--red);
+  letter-spacing:-.3px;display:flex;align-items:center;gap:4px;
+}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-profile{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--red-pale);border:1.5px solid var(--red-light);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.nav-profile svg{width:18px;height:18px;stroke:var(--red);stroke-width:2;fill:none;stroke-linecap:round}
+.nav-signup{
+  background:var(--red);color:#fff;
+  font-size:13px;font-weight:800;
+  padding:7px 16px;border-radius:20px;
+  border:none;cursor:pointer;
+  transition:opacity .15s;
+  white-space:nowrap;
+}
+.nav-signup:active{opacity:.8}
+
+/* ── HERO SECTION ── */
+.hero{
+  background:linear-gradient(175deg,var(--cream) 0%,var(--peach) 55%,var(--peach-deep) 100%);
+  position:relative;overflow:hidden;
+}
+.hero-svg-wrap{
+  width:100%;max-width:480px;
+  margin:0 auto;display:block;
+}
+.hero-svg-wrap svg{
+  width:100%;height:auto;display:block;
+}
+
+/* ── COPY BLOCK ── */
+.hero-copy{
+  background:var(--cream);
+  padding:16px 20px 20px;
+  text-align:center;
+}
+.badge-vn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--red-pale);border:1px solid var(--red-light);
+  border-radius:20px;padding:4px 12px;
+  margin-bottom:10px;
+}
+.badge-vn span{font-size:13px}
+.badge-vn-text{font-size:11px;font-weight:700;color:var(--red)}
+
+.headline{
+  font-size:clamp(22px,6vw,30px);
+  font-weight:800;color:var(--navy);
+  line-height:1.22;margin-bottom:4px;
+}
+.headline-jp{
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--tan-light);letter-spacing:.5px;
+  margin-bottom:14px;
+}
+
+/* ── HOOK PHRASES ── */
+.hooks{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
+.hook{
+  background:var(--red-pale);border-radius:12px;
+  padding:9px 13px;
+  display:flex;align-items:center;gap:8px;
+}
+.hook-icon{font-size:16px;flex-shrink:0}
+.hook-text{font-size:12px;font-weight:700;color:var(--red);line-height:1.4}
+
+/* ── STATS ── */
+.stats{
+  display:flex;
+  background:var(--red-pale);border-radius:14px;
+  overflow:hidden;margin-bottom:16px;
+}
+.stat{
+  flex:1;padding:10px 6px;text-align:center;
+  border-right:1px solid #FDDDE6;
+}
+.stat:last-child{border-right:none}
+.stat-num{
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:15px;font-weight:900;color:var(--red);
+  line-height:1.1;margin-bottom:2px;
+}
+.stat-lbl{font-size:9px;color:var(--tan);font-weight:600;line-height:1.3}
+
+/* ── CTA ── */
+.cta-btn{
+  display:block;width:100%;
+  background:var(--red);color:#fff;
+  font-size:15px;font-weight:800;
+  padding:15px 0;border-radius:28px;
+  border:none;cursor:pointer;
+  letter-spacing:.2px;margin-bottom:6px;
+  transition:opacity .15s,transform .1s;
+}
+.cta-btn:active{opacity:.88;transform:scale(.98)}
+.cta-sub{
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:10px;color:var(--tan-light);
+}
+
+/* ── FEATURES SECTION ── */
+.section{padding:20px 16px}
+.section-title{
+  font-size:17px;font-weight:800;color:var(--navy);
+  margin-bottom:4px;
+}
+.section-sub{font-size:12px;color:var(--tan);margin-bottom:14px}
+
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.feat-card{
+  background:#fff;border-radius:14px;
+  border:1.5px solid var(--border);
+  padding:14px 12px;
+  position:relative;overflow:hidden;
+  transition:transform .15s;
+}
+.feat-card:active{transform:scale(.97)}
+.feat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--red);
+}
+.feat-card.premium::before{background:linear-gradient(90deg,var(--gold),#E76F51)}
+.feat-icon{font-size:22px;margin-bottom:6px}
+.feat-name{font-size:12px;font-weight:800;color:var(--navy);margin-bottom:3px}
+.feat-desc{font-size:10px;color:var(--tan);line-height:1.4}
+.feat-pro-badge{
+  position:absolute;top:8px;right:8px;
+  background:linear-gradient(135deg,var(--gold),#E76F51);
+  color:#fff;font-size:8px;font-weight:800;
+  padding:2px 6px;border-radius:6px;
+}
+
+/* ── PREMIUM SECTION ── */
+.premium-section{
+  margin:0 16px 20px;
+  background:linear-gradient(145deg,#1D3557,#2D4A6B);
+  border-radius:20px;padding:20px;
+  color:#fff;
+}
+.prem-header{
+  display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.prem-title{font-size:18px;font-weight:800}
+.prem-badge{
+  background:linear-gradient(135deg,var(--gold),#E76F51);
+  color:#fff;font-size:9px;font-weight:800;
+  padding:3px 8px;border-radius:8px;
+}
+.prem-sub{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:14px}
+.prem-price{
+  font-size:28px;font-weight:900;color:var(--gold);
+  margin-bottom:2px;line-height:1;
+}
+.prem-price span{font-size:13px;color:rgba(255,255,255,.5);font-weight:400}
+.prem-price-sub{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:14px}
+
+.prem-list{margin-bottom:16px}
+.prem-item{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:12px;color:rgba(255,255,255,.85);line-height:1.4;
+}
+.prem-item:last-child{border-bottom:none}
+.prem-check{color:var(--gold);font-size:13px;flex-shrink:0;margin-top:1px}
+.prem-item-main{font-weight:700}
+.prem-item-sub{font-size:10px;color:rgba(255,255,255,.5)}
+
+.prem-cta{
+  display:block;width:100%;
+  background:linear-gradient(135deg,var(--gold),#E76F51);
+  color:#fff;font-size:14px;font-weight:800;
+  padding:14px 0;border-radius:24px;border:none;cursor:pointer;
+  transition:opacity .15s,transform .1s;
+  letter-spacing:.2px;
+}
+.prem-cta:active{opacity:.88;transform:scale(.98)}
+.prem-cs{
+  margin-top:10px;text-align:center;
+  font-size:10px;color:rgba(255,255,255,.4);
+}
+
+/* ── ZOOM SECTION ── */
+.zoom-section{
+  margin:0 16px 20px;
+  background:#fff;border-radius:16px;
+  border:1.5px solid var(--border);
+  overflow:hidden;
+}
+.zoom-header{
+  background:linear-gradient(135deg,#1D3557,#2D4A6B);
+  padding:14px 16px;
+  display:flex;align-items:center;gap:10px;
+}
+.zoom-header-icon{font-size:24px}
+.zoom-header-title{font-size:15px;font-weight:800;color:#fff}
+.zoom-header-sub{font-size:10px;color:rgba(255,255,255,.6)}
+.zoom-body{padding:14px 16px}
+.zoom-item{
+  padding:10px 0;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:10px;
+}
+.zoom-item:last-child{border-bottom:none}
+.zoom-date{font-size:10px;font-weight:700;color:var(--red);margin-bottom:2px}
+.zoom-name{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:2px}
+.zoom-desc{font-size:10px;color:var(--tan)}
+.zoom-seats{
+  margin-left:auto;flex-shrink:0;
+  background:var(--red-pale);color:var(--red);
+  font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:8px;
+  white-space:nowrap;
+}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,251,248,.97);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-top:1.5px solid var(--border);
+  display:flex;
+  padding-bottom:var(--safe-bottom);
+  z-index:100;
+}
+.bni{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:3px;padding:8px 4px;
+  cursor:pointer;border:none;background:none;
+  -webkit-tap-highlight-color:transparent;
+  min-height:54px;
+}
+.bni svg{width:22px;height:22px;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.bni-lbl{font-size:9px;font-weight:700;color:var(--tan)}
+.bni.active svg{stroke:var(--red)}
+.bni.active .bni-lbl{color:var(--red)}
+.bni-dot{
+  position:absolute;top:6px;right:calc(50% - 16px);
+  width:7px;height:7px;background:var(--gold);
+  border-radius:50%;border:1.5px solid var(--cream);
+}
+.bni-wrap{position:relative}
+
+/* main content bottom padding for fixed nav */
+.main-content{padding-bottom:calc(70px + var(--safe-bottom))}
+
+/* ── FOOTER ── */
+.footer{
+  text-align:center;padding:20px 16px;
+  font-size:11px;color:var(--tan-light);
+  border-top:1px solid var(--border);
+  background:var(--cream);
+}
+.footer a{color:var(--red);text-decoration:none}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.hero-copy,.section,.premium-section,.zoom-section{
+  animation:fadeUp .4s ease both;
+}
+.section{animation-delay:.1s}
+.premium-section{animation-delay:.15s}
+.zoom-section{animation-delay:.2s}
+
+/* ── RESPONSIVE TWEAKS ── */
+@media(min-width:480px){
+  .topnav{padding:10px 24px}
+  .hero-copy,.section{padding-left:24px;padding-right:24px}
+  .premium-section,.zoom-section{margin-left:24px;margin-right:24px}
+  .headline{font-size:28px}
+}
+@media(min-width:640px){
+  body{background:#F5EDE5}
+  .topnav,.hero,.hero-copy,.main-content{max-width:480px;margin:0 auto}
+  .topnav{border-radius:0;position:sticky}
+  .bnav{max-width:480px;left:50%;transform:translateX(-50%)}
+  body::before{
+    content:'';position:fixed;inset:0;
+    background:#F5EDE5;z-index:-1;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-logo">
+    <span style="font-family:'Zen Maru Gothic',sans-serif">日</span>
+    NihonGo!
+  </div>
+  <div class="nav-right">
+    <button class="nav-profile" aria-label="Hồ sơ">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+    <button class="nav-signup">Đăng ký</button>
+  </div>
+</nav>
+
+<div class="main-content">
+
+  <!-- HERO ILLUSTRATION -->
+  <div class="hero">
+    <div class="hero-svg-wrap">
+      <svg viewBox="0 0 390 340" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- ambient glow -->
+        <circle cx="195" cy="210" r="130" fill="#FDDACB" opacity=".22"/>
+        <circle cx="195" cy="218" r="100" fill="#FBC8B5" opacity=".13"/>
+
+        <!-- TORII -->
+        <rect x="30"  y="52"  width="330" height="18" rx="9"   fill="#C1121F"/>
+        <rect x="18"  y="56"  width="28"  height="13" rx="6.5" fill="#C1121F"/>
+        <rect x="344" y="56"  width="28"  height="13" rx="6.5" fill="#C1121F"/>
+        <rect x="58"  y="73"  width="274" height="14" rx="7"   fill="#C1121F"/>
+        <rect x="76"  y="87"  width="28"  height="228" rx="14" fill="#C1121F"/>
+        <rect x="286" y="87"  width="28"  height="228" rx="14" fill="#C1121F"/>
+        <rect x="64"  y="306" width="52"  height="16" rx="8"   fill="#A30F18"/>
+        <rect x="274" y="306" width="52"  height="16" rx="8"   fill="#A30F18"/>
+        <rect x="76"  y="87"  width="9"   height="228" rx="4.5" fill="#A30F18" opacity=".2"/>
+        <rect x="286" y="87"  width="9"   height="228" rx="4.5" fill="#A30F18" opacity=".2"/>
+
+        <!-- SAKURA BRANCHES -->
+        <path d="M8 142 Q30 116 72 136"  fill="none" stroke="#E8A0A8" stroke-width="2.2" stroke-linecap="round" opacity=".46"/>
+        <path d="M8 106 Q36 88 68 106"   fill="none" stroke="#E8A0A8" stroke-width="1.6" stroke-linecap="round" opacity=".32"/>
+        <path d="M382 138 Q358 112 318 132" fill="none" stroke="#E8A0A8" stroke-width="2.2" stroke-linecap="round" opacity=".46"/>
+        <path d="M382 102 Q354 84 322 102" fill="none" stroke="#E8A0A8" stroke-width="1.6" stroke-linecap="round" opacity=".32"/>
+
+        <!-- PETALS scattered -->
+        <ellipse cx="28"  cy="98"  rx="10" ry="6"   fill="#FBBCC8" opacity=".70" transform="rotate(-22,28,98)"/>
+        <ellipse cx="52"  cy="44"  rx="8"  ry="5"   fill="#F9B0C0" opacity=".58" transform="rotate(12,52,44)"/>
+        <ellipse cx="14"  cy="66"  rx="7"  ry="4.5" fill="#FDC8D5" opacity=".50" transform="rotate(30,14,66)"/>
+        <ellipse cx="352" cy="70"  rx="9"  ry="5.5" fill="#FBBCC8" opacity=".62" transform="rotate(18,352,70)"/>
+        <ellipse cx="374" cy="110" rx="7"  ry="4.5" fill="#F9B0C0" opacity=".48" transform="rotate(-14,374,110)"/>
+        <ellipse cx="330" cy="42"  rx="7"  ry="4.5" fill="#FDC8D5" opacity=".50" transform="rotate(-8,330,42)"/>
+        <ellipse cx="18"  cy="182" rx="7"  ry="4.2" fill="#FDC8D5" opacity=".46" transform="rotate(25,18,182)"/>
+        <ellipse cx="374" cy="170" rx="8"  ry="4.6" fill="#FBBCC8" opacity=".44" transform="rotate(-18,374,170)"/>
+        <ellipse cx="44"  cy="252" rx="6"  ry="3.5" fill="#FDDDE6" opacity=".52" transform="rotate(8,44,252)"/>
+        <ellipse cx="350" cy="240" rx="6"  ry="4"   fill="#FDC8D5" opacity=".48" transform="rotate(-24,350,240)"/>
+        <!-- branch clusters -->
+        <ellipse cx="72"  cy="132" rx="8"  ry="5"   fill="#FBBCC8" opacity=".66" transform="rotate(-12,72,132)"/>
+        <ellipse cx="60"  cy="120" rx="6"  ry="3.8" fill="#FDC8D5" opacity=".60" transform="rotate(18,60,120)"/>
+        <ellipse cx="318" cy="128" rx="8"  ry="5"   fill="#FBBCC8" opacity=".66" transform="rotate(12,318,128)"/>
+        <ellipse cx="330" cy="116" rx="6"  ry="3.8" fill="#FDC8D5" opacity=".58" transform="rotate(-18,330,116)"/>
+        <!-- low floating -->
+        <ellipse cx="138" cy="316" rx="7"  ry="4"   fill="#FBBCC8" opacity=".38" transform="rotate(20,138,316)"/>
+        <ellipse cx="195" cy="322" rx="6"  ry="3.5" fill="#FDC8D5" opacity=".34" transform="rotate(-5,195,322)"/>
+        <ellipse cx="252" cy="318" rx="7"  ry="4"   fill="#FBBCC8" opacity=".36" transform="rotate(-22,252,318)"/>
+
+        <!-- CHARACTER shadow -->
+        <ellipse cx="195" cy="308" rx="52" ry="13" fill="#E8A898" opacity=".14"/>
+
+        <!-- BODY -->
+        <ellipse cx="195" cy="278" rx="46" ry="28" fill="#FDDACB"/>
+        <ellipse cx="195" cy="292" rx="37" ry="17" fill="#FBBCC8" opacity=".35"/>
+        <!-- arms -->
+        <ellipse cx="142" cy="268" rx="19" ry="12" fill="#FDDACB" transform="rotate(-22,142,268)"/>
+        <ellipse cx="248" cy="268" rx="19" ry="12" fill="#FDDACB" transform="rotate(22,248,268)"/>
+
+        <!-- NECK -->
+        <rect x="186" y="230" width="18" height="24" rx="9" fill="#FDDACB"/>
+
+        <!-- HEAD -->
+        <circle cx="195" cy="210" r="56" fill="#FDDACB"/>
+
+        <!-- HAIR -->
+        <ellipse cx="195" cy="160" rx="48" ry="23" fill="#3D1C08"/>
+        <ellipse cx="148" cy="182" rx="18" ry="34" fill="#3D1C08"/>
+        <ellipse cx="242" cy="182" rx="18" ry="34" fill="#3D1C08"/>
+        <ellipse cx="178" cy="156" rx="16" ry="8"  fill="#5A2E12" opacity=".38"/>
+
+        <!-- EARS -->
+        <circle cx="139" cy="210" r="11" fill="#FDDACB"/>
+        <circle cx="251" cy="210" r="11" fill="#FDDACB"/>
+        <circle cx="139" cy="210" r="7"  fill="#F5C4A8"/>
+        <circle cx="251" cy="210" r="7"  fill="#F5C4A8"/>
+
+        <!-- EYES -->
+        <ellipse cx="174" cy="207" rx="20" ry="22" fill="#fff"/>
+        <ellipse cx="216" cy="207" rx="20" ry="22" fill="#fff"/>
+        <circle  cx="174" cy="209" r="13"  fill="#3D1C08"/>
+        <circle  cx="216" cy="209" r="13"  fill="#3D1C08"/>
+        <circle  cx="179" cy="203" r="5.5" fill="#fff"/>
+        <circle  cx="221" cy="203" r="5.5" fill="#fff"/>
+        <circle  cx="168" cy="215" r="2.4" fill="#fff" opacity=".55"/>
+        <circle  cx="210" cy="215" r="2.4" fill="#fff" opacity=".55"/>
+
+        <!-- LASHES -->
+        <path d="M155 188 Q165 181 174 187" fill="none" stroke="#3D1C08" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M196 187 Q205 181 216 188" fill="none" stroke="#3D1C08" stroke-width="3.2" stroke-linecap="round"/>
+
+        <!-- BLUSH -->
+        <ellipse cx="148" cy="222" rx="17" ry="10" fill="#FBBCC8" opacity=".58"/>
+        <ellipse cx="242" cy="222" rx="17" ry="10" fill="#FBBCC8" opacity=".58"/>
+
+        <!-- NOSE -->
+        <ellipse cx="195" cy="224" rx="4" ry="2.5" fill="#E8A898" opacity=".50"/>
+
+        <!-- SMILE -->
+        <path d="M182 234 Q195 246 208 234" fill="none" stroke="#C1121F" stroke-width="3.4" stroke-linecap="round"/>
+
+        <!-- KANZASHI -->
+        <rect x="225" y="158" width="6" height="30" rx="3" fill="#C1121F"/>
+        <circle cx="228" cy="158" r="10" fill="#C1121F"/>
+        <circle cx="228" cy="158" r="6.5" fill="#FFD6E0"/>
+        <circle cx="225" cy="155" r="2.2" fill="#fff" opacity=".7"/>
+
+        <!-- SPEECH BUBBLE -->
+        <rect x="230" y="128" width="140" height="48" rx="18" fill="#fff" stroke="#FBBCC8" stroke-width="2.2"/>
+        <path d="M237 176 L220 192 L252 176" fill="#fff" stroke="#FBBCC8" stroke-width="2.2"/>
+        <text x="300" y="151" text-anchor="middle" font-family="'Zen Maru Gothic',sans-serif" font-size="15" font-weight="900" fill="#C1121F">こんにちは！</text>
+        <text x="300" y="167" text-anchor="middle" font-family="'Be Vietnam Pro',sans-serif"     font-size="12" font-weight="700" fill="#B08070">Xin chào bạn!</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <!-- COPY BLOCK -->
+  <div class="hero-copy">
+    <div class="badge-vn">
+      <span>🇻🇳</span>
+      <span class="badge-vn-text">Dành riêng cho người Việt Nam</span>
+    </div>
+    <div class="headline">Học tiếng Nhật<br>vui &amp; hiệu quả!</div>
+    <div class="headline-jp">楽しく日本語を学ぼう</div>
+
+    <div class="hooks">
+      <div class="hook">
+        <span class="hook-icon">🔥</span>
+        <span class="hook-text">Tiếng Nhật thực chiến — không phải sách giáo khoa!</span>
+      </div>
+      <div class="hook">
+        <span class="hook-icon">💬</span>
+        <span class="hook-text">Nói chuyện với người Nhật thật — ngay từ tháng đầu!</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num" style="font-family:'Zen Maru Gothic',sans-serif">N5→N1</div>
+        <div class="stat-lbl">Đầy đủ<br>mọi cấp độ</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">月5回</div>
+        <div class="stat-lbl">Zoom với<br>người Nhật</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">Miễn phí</div>
+        <div class="stat-lbl">Bắt đầu<br>ngay hôm nay</div>
+      </div>
+    </div>
+
+    <button class="cta-btn">🎌 Bắt đầu miễn phí →</button>
+    <div class="cta-sub">無料で始める · Không cần thẻ tín dụng</div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section">
+    <div class="section-title">Tính năng học tập</div>
+    <div class="section-sub">Từ cơ bản đến nâng cao • Cho người Việt Nam</div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-name">Tìm kiếm Việt→Nhật</div>
+        <div class="feat-desc">Nhập tiếng Việt, nhận ngay tiếng Nhật + âm thanh</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📚</div>
+        <div class="feat-name">Học theo tình huống</div>
+        <div class="feat-desc">Bạn bè · Tình yêu · Công việc · Phỏng vấn · Nhà hàng</div>
+      </div>
+      <div class="feat-card premium">
+        <div class="feat-pro-badge">PRO</div>
+        <div class="feat-icon">🔥</div>
+        <div class="feat-name">Tiếng lóng giới trẻ</div>
+        <div class="feat-desc">Từ không có trong sách giáo khoa</div>
+      </div>
+      <div class="feat-card premium">
+        <div class="feat-pro-badge">PRO</div>
+        <div class="feat-icon">✏️</div>
+        <div class="feat-name">Bảng sửa bài</div>
+        <div class="feat-desc">Người Nhật bản ngữ sửa văn phạm</div>
+      </div>
+      <div class="feat-card premium">
+        <div class="feat-pro-badge">PRO</div>
+        <div class="feat-icon">🎥</div>
+        <div class="feat-name">Zoom giao lưu</div>
+        <div class="feat-desc">Tháng 5 buổi với giáo viên người Nhật</div>
+      </div>
+      <div class="feat-card premium">
+        <div class="feat-pro-badge">PRO</div>
+        <div class="feat-icon">🎭</div>
+        <div class="feat-name">Bí kíp người Nhật</div>
+        <div class="feat-desc">Văn hóa · Hẹn hò · Công sở · LINE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREMIUM SECTION -->
+  <div class="premium-section">
+    <div class="prem-header">
+      <div class="prem-title">Premium</div>
+      <div class="prem-badge">⭐ BEST VALUE</div>
+    </div>
+    <div class="prem-sub">Mở khoá toàn bộ tính năng • Học nhanh gấp 3 lần</div>
+
+    <div class="prem-price">¥1,980 <span>/tháng</span></div>
+    <div class="prem-price-sub">hoặc ¥17,820/năm (tiết kiệm 25%)</div>
+
+    <div class="prem-list">
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Tất cả tình huống • 50+ câu/loại</div>
+          <div class="prem-item-sub">Bạn bè, tình yêu, công việc, phỏng vấn, cửa hàng...</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Tiếng lóng &amp; từ giới trẻ Nhật</div>
+          <div class="prem-item-sub">やばい, 草, ぴえん, ガチ... không có trong sách</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Bảng sửa bài • Người Nhật bản ngữ</div>
+          <div class="prem-item-sub">Đăng bài tiếng Nhật, được sửa miễn phí</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Zoom giao lưu tháng 5 buổi</div>
+          <div class="prem-item-sub">Nhóm nhỏ 5–10 người • Chỉ dùng tiếng Nhật</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Bí kíp chinh phục người Nhật</div>
+          <div class="prem-item-sub">Bản thật &amp; bản ngoài, cách từ chối, văn hóa LINE, hẹn hò...</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main">Hướng dẫn làm việc tại Nhật</div>
+          <div class="prem-item-sub">CV, phỏng vấn, xử lý vấn đề nơi làm việc</div>
+        </div>
+      </div>
+      <div class="prem-item">
+        <span class="prem-check">✓</span>
+        <div>
+          <div class="prem-item-main" style="display:flex;align-items:center;gap:6px">
+            🎤 AI Hội thoại
+            <span style="background:rgba(255,255,255,.15);font-size:9px;padding:2px 6px;border-radius:6px;font-weight:700">Sắp ra mắt</span>
+          </div>
+          <div class="prem-item-sub">Luyện nói với AI • Phân tích phát âm</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="prem-cta">⭐ Đăng ký Premium →</button>
+    <div class="prem-cs">💳 Thanh toán an toàn · Hủy bất kỳ lúc nào</div>
+  </div>
+
+  <!-- ZOOM MEETINGS -->
+  <div class="zoom-section">
+    <div class="zoom-header">
+      <div class="zoom-header-icon">🎥</div>
+      <div>
+        <div class="zoom-header-title">Zoom giao lưu với người Nhật</div>
+        <div class="zoom-header-sub">Tháng 5 buổi · 1 tiếng · Nhóm nhỏ 5–10 người</div>
+      </div>
+    </div>
+    <div class="zoom-body">
+      <div class="zoom-item">
+        <div>
+          <div class="zoom-date">📅 Thứ 7, 05/07 · 20:00–21:00</div>
+          <div class="zoom-name">Tự giới thiệu &amp; hội thoại hàng ngày</div>
+          <div class="zoom-desc">Dành cho người mới bắt đầu • Đại hoan nghênh</div>
+        </div>
+        <div class="zoom-seats">6/10</div>
+      </div>
+      <div class="zoom-item">
+        <div>
+          <div class="zoom-date">📅 Thứ 7, 12/07 · 20:00–21:00</div>
+          <div class="zoom-name">Tiếng Nhật văn phòng &amp; kính ngữ</div>
+          <div class="zoom-desc">Cho người đi làm tại Nhật</div>
+        </div>
+        <div class="zoom-seats" style="background:#FEF3C7;color:#92400E">8/10 🔥</div>
+      </div>
+      <div class="zoom-item">
+        <div>
+          <div class="zoom-date">📅 Thứ 7, 19/07 · 20:00–21:00</div>
+          <div class="zoom-name">Tình yêu &amp; hẹn hò bằng tiếng Nhật</div>
+          <div class="zoom-desc">告白、デート、LINE攻略</div>
+        </div>
+        <div class="zoom-seats">3/10</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div style="margin-bottom:6px">
+      <span style="font-family:'Zen Maru Gothic',sans-serif;font-weight:900;color:#C1121F">日 NihonGo!</span>
+      · Học tiếng Nhật cho người Việt
+    </div>
+    <div>© 2026 NihonGo · <a href="#">Điều khoản</a> · <a href="#">Bảo mật</a></div>
+  </div>
+
+</div><!-- /main-content -->
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="bni active">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="bni-lbl">Trang chủ</span>
+  </button>
+  <button class="bni">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span class="bni-lbl">Tìm kiếm</span>
+  </button>
+  <button class="bni">
+    <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    <span class="bni-lbl">Học tập</span>
+  </button>
+  <button class="bni">
+    <div class="bni-wrap">
+      <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+    </div>
+    <span class="bni-lbl">Đã lưu</span>
+  </button>
+  <button class="bni">
+    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span class="bni-lbl">Premium</span>
+  </button>
+</nav>
+
+<script>
+document.querySelectorAll('.bni').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+document.querySelector('.cta-btn').addEventListener('click',()=>{
+  alert('登録ページへ移動します！\nChuyển đến trang đăng ký!');
+});
+document.querySelector('.prem-cta').addEventListener('click',()=>{
+  alert('Premiumページへ移動します！\nChuyển đến trang Premium!');
+});
+</script>
+</body>
+</html>
