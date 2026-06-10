@@ -1,54 +1,52 @@
-// api/webhook.js
-// Stripe決済完了後にFirestoreのユーザーをPremiumにする
- 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
  
-// Firebase Admin SDK
-let admin;
-let db;
- 
-function initFirebase() {
-  if (db) return; // already initialized
-  if (!admin) {
-    admin = require('firebase-admin');
-    if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-      });
-    }
-  }
-  db = admin.firestore();
-}
- 
 module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).end();
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, stripe-signature');
+ 
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
  
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
  
   let event;
   try {
-    // Stripeの署名を検証（セキュリティ上必須）
     const rawBody = await getRawBody(req);
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature error:', err.message);
-    return res.status(400).json({ error: `Webhook Error: ${err.message}` });
+    return res.status(400).json({ error: err.message });
   }
  
   try {
-    initFirebase();
+    // Firebase Admin を毎回初期化
+    const admin = require('firebase-admin');
+    
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY
+            ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+            : undefined,
+        }),
+      });
+    }
+    
+    const db = admin.firestore();
+ 
+    console.log('Event type:', event.type);
  
     switch (event.type) {
  
-      // ✅ 決済成功 → Premiumに昇格
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const userId = session.metadata?.userId;
+        const userId = session.metadata?.userId || session.subscription_data?.metadata?.userId;
+        console.log('checkout completed, userId:', userId);
  
         if (userId) {
           await db.collection('users').doc(userId).set({
@@ -58,34 +56,28 @@ module.exports = async (req, res) => {
             stripeSubscriptionId: session.subscription,
             plan: session.metadata?.plan || 'monthly',
           }, { merge: true });
- 
-          console.log(`✅ User ${userId} upgraded to Premium`);
+          console.log('✅ User upgraded to Premium:', userId);
         }
         break;
       }
  
-      // ✅ サブスクリプション更新成功（毎月の支払い）
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
-        const customerId = invoice.customer;
+        const userId = invoice.parent?.subscription_details?.metadata?.userId 
+                    || invoice.lines?.data?.[0]?.metadata?.userId;
+        console.log('invoice paid, userId:', userId);
  
-        // customerId から userId を取得
-        const usersSnap = await db.collection('users')
-          .where('stripeCustomerId', '==', customerId)
-          .limit(1)
-          .get();
- 
-        if (!usersSnap.empty) {
-          await usersSnap.docs[0].ref.update({
+        if (userId) {
+          await db.collection('users').doc(userId).set({
             premium: true,
             premiumRenewedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-          console.log(`✅ Subscription renewed for customer ${customerId}`);
+            stripeCustomerId: invoice.customer,
+          }, { merge: true });
+          console.log('✅ Premium renewed:', userId);
         }
         break;
       }
  
-      // ❌ 支払い失敗 → Premiumを停止
       case 'invoice.payment_failed':
       case 'customer.subscription.deleted': {
         const obj = event.data.object;
@@ -101,13 +93,13 @@ module.exports = async (req, res) => {
             premium: false,
             premiumEndedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
-          console.log(`❌ Premium cancelled for customer ${customerId}`);
+          console.log('❌ Premium cancelled for:', customerId);
         }
         break;
       }
  
       default:
-        console.log(`Unhandled event: ${event.type}`);
+        console.log('Unhandled event:', event.type);
     }
  
     return res.status(200).json({ received: true });
@@ -118,7 +110,6 @@ module.exports = async (req, res) => {
   }
 };
  
-// Vercelでraw bodyを取得するヘルパー
 function getRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
