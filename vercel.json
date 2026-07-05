@@ -1,9 +1,6 @@
 {
-  "version": 2,
   "rewrites": [
-    {
-      "source": "/",
-      "destination": "/NihonGo_App.html"
-    }
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/((?!privacy).*)", "destination": "/NihonGo_App.html" }
   ]
 }
