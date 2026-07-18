@@ -1,5 +1,12 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
- 
+
+// Stripeのplanメタデータ → Firestoreに保存するpremiumPlanのマッピング
+function resolvePremiumPlan(rawPlan) {
+  if (rawPlan === 'ume' || rawPlan === 'take' || rawPlan === 'matsu') return rawPlan;
+  // 旧データ（monthly/yearly）との互換: 明確でなければTAKE相当とみなす
+  return 'take';
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -58,17 +65,20 @@ module.exports = async (req, res) => {
         const userId = session.metadata?.userId
                     || session.subscription_data?.metadata?.userId
                     || session.client_reference_id;
-        console.log('checkout completed, userId:', userId, 'session:', session.id);
+        const rawPlan = session.metadata?.plan;
+        const premiumPlan = resolvePremiumPlan(rawPlan);
+        console.log('checkout completed, userId:', userId, 'plan:', premiumPlan, 'session:', session.id);
  
         if (userId) {
           await db.collection('users').doc(userId).set({
             premium: true,
+            premiumPlan: premiumPlan,
             premiumSince: admin.firestore.FieldValue.serverTimestamp(),
             stripeCustomerId: session.customer,
             stripeSubscriptionId: session.subscription,
-            plan: session.metadata?.plan || 'monthly',
+            plan: premiumPlan === 'matsu' ? 'yearly' : 'monthly',
           }, { merge: true });
-          console.log('✅ User upgraded to Premium:', userId);
+          console.log('✅ User upgraded to Premium:', userId, premiumPlan);
         }
         break;
       }
@@ -77,14 +87,19 @@ module.exports = async (req, res) => {
         const invoice = event.data.object;
         const userId = invoice.parent?.subscription_details?.metadata?.userId 
                     || invoice.lines?.data?.[0]?.metadata?.userId;
+        const rawPlan = invoice.parent?.subscription_details?.metadata?.plan
+                    || invoice.lines?.data?.[0]?.metadata?.plan;
         console.log('invoice paid, userId:', userId);
  
         if (userId) {
-          await db.collection('users').doc(userId).set({
+          const updateData = {
             premium: true,
             premiumRenewedAt: admin.firestore.FieldValue.serverTimestamp(),
             stripeCustomerId: invoice.customer,
-          }, { merge: true });
+          };
+          // 更新のたびにplanメタデータが取れていれば同期しておく（プラン変更の反映漏れ防止）
+          if (rawPlan) updateData.premiumPlan = resolvePremiumPlan(rawPlan);
+          await db.collection('users').doc(userId).set(updateData, { merge: true });
           console.log('✅ Premium renewed:', userId);
         }
         break;

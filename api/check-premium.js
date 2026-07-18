@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
     const data = doc.data();
     return res.status(200).json({
       premium: data.premium === true,
+      premiumPlan: data.premiumPlan || (data.premium === true ? 'take' : 'free'),
       plan: data.plan || 'monthly',
       since: data.premiumSince?.toDate?.()?.toISOString() || null,
     });
