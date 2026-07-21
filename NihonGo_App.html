@@ -16200,6 +16200,30 @@ function staminaHearts(h){
 }
 
 /* ── スタミナ切れモーダル（次の回復までのカウントダウン付き） ── */
+/* ── スタミナ切れ時のUME(梅)アップセル ──
+   毎回フルの宣伝を出すとくどいので、1日1回だけ大きめのカードを見せ、
+   同日内の再表示は控えめな一行リンクにとどめる（既存の日次表示制御と同じlocalStorage日付比較方式） */
+function _staminaUmeUpsellHTML(){
+  try{
+    if(typeof isAnyPremium==='function' && isAnyPremium()) return ''; // 既にプレミアムなら出さない
+  }catch(e){}
+  var today=(typeof getTodayDateStr==='function')?getTodayDateStr():(new Date()).toISOString().slice(0,10);
+  var key='ng_ume_upsell_shown';
+  var shownToday=(localStorage.getItem(key)===today);
+  var openUme="document.getElementById('staminaModalOv').remove();openPaymentModal('ume')";
+
+  if(!shownToday){
+    try{ localStorage.setItem(key, today); }catch(e){}
+    return '<div onclick="'+openUme+'" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1.5px solid #4CAF50;border-radius:14px;padding:13px;margin-bottom:12px;text-align:left;cursor:pointer;touch-action:manipulation">'
+      +'<div style="font-size:12.5px;font-weight:800;color:#1B5E20;margin-bottom:2px">🌸 '+L('UME: tim vô hạn ♾️, học không giới hạn','梅プランならスタミナ無制限で学び放題')+'</div>'
+      +'<div style="font-size:11px;color:#2E7D32;margin-bottom:8px">'+L('Gói rẻ nhất · không cần chờ hồi tim nữa','一番手頃なプラン・回復待ち不要に')+'</div>'
+      +'<div style="background:#fff;border-radius:10px;padding:8px;text-align:center;font-size:12.5px;font-weight:800;color:#2E7D32">🌸 '+L('Xem gói UME →','UMEプランを見る →')+'</div>'
+      +'</div>';
+  }
+  // 同日2回目以降は控えめな一行リンクのみ
+  return '<div onclick="'+openUme+'" style="font-size:11.5px;color:#2E7D32;font-weight:700;margin-bottom:12px;cursor:pointer;text-decoration:underline;touch-action:manipulation">🌸 '+L('UME: tim vô hạn, xem thêm →','梅プランでスタミナ無制限に →')+'</div>';
+}
+
 function showStaminaModal(){
   var old = document.getElementById('staminaModalOv');
   if(old) old.remove();
@@ -16218,10 +16242,7 @@ function showStaminaModal(){
     +'<div style="font-size:10px;color:#B91C1C;margin-top:4px">'+L('30 phút hồi 1 tim · tối đa 7','30分で1つ回復・最大7つ')+'</div>'
     +'</div>'
     +'<div style="font-size:11px;color:var(--tan);margin-bottom:8px">🎁 '+L('Sắp có: nhận thêm ❤️ từ điểm danh hằng ngày!','近日：ログインボーナスで❤️配布予定！')+'</div>'
-    +'<div class="app-hide" style="margin-bottom:12px">'
-    +'<div onclick="document.getElementById(\'staminaModalOv\').remove();openPaymentModal()" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1.5px solid #4CAF50;border-radius:12px;padding:9px;margin-bottom:6px;font-size:12px;font-weight:800;color:#1B5E20;cursor:pointer;touch-action:manipulation">💚 '+L('Semi-Premium: tim vô hạn ♾️ · chỉ 450¥/tháng','セミPremium：スタミナ無制限 ♾️・月額450円')+'</div>'
-    +'<div onclick="document.getElementById(\'staminaModalOv\').remove();openPaymentModal()" style="background:linear-gradient(135deg,#FFD70033,#FFA50022);border:1.5px solid #FFD700;border-radius:12px;padding:9px;font-size:12px;font-weight:800;color:#7C4A00;cursor:pointer;touch-action:manipulation">⭐ '+L('Premium: tất cả tính năng + Zoom','Premium：全機能＋Zoomレッスン')+'</div>'
-    +'</div>'
+    +_staminaUmeUpsellHTML()
     +'<button onclick="document.getElementById(\'staminaModalOv\').remove()" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;touch-action:manipulation">'+L('Đã hiểu','わかった')+'</button>'
     +'</div>';
   document.body.appendChild(ov);
