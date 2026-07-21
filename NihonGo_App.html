@@ -5391,10 +5391,11 @@ function showModal(type){
         🎁 ${L('Nội dung độc quyền MATSU','MATSU限定コンテンツ')}<br>
         🆕 ${L('Trải nghiệm sớm tính năng mới','新機能の先行体験')}
       </div>
-      <button class="btn btn-gold btn-block" onclick="window._selectedPlan='matsu';startStripeCheckout()" style="font-size:15px;padding:15px;background:linear-gradient(135deg,#CE93D8,#AB47BC)">
+      <button id="stripeCheckoutBtn" class="btn btn-gold btn-block" onclick="startCheckout('matsu')" style="font-size:15px;padding:15px;background:linear-gradient(135deg,#CE93D8,#AB47BC)">
         💳 ${L('Nâng cấp MATSU →','MATSUにアップグレード →')}
       </button>
-      <div style="text-align:center;font-size:11px;color:var(--tan);margin-top:10px">🔒 Stripe · ${L('Hoàn tiền 7 ngày','7日間返金保証')}</div>`;
+      <div style="text-align:center;font-size:11px;color:var(--tan);margin-top:10px">${IS_NATIVE_APP?'🍎 App Store · ':'🔒 Stripe · '}${L('Hoàn tiền 7 ngày','7日間返金保証')}</div>
+      ${IS_NATIVE_APP?'<div style="text-align:center;margin-top:8px"><span onclick="restoreNativePurchases()" style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline">'+L('Khôi phục giao dịch mua','購入を復元')+'</span></div>':''}`;
       return;
     }
     var _pre=window._preselectPlan||'take';
@@ -5422,12 +5423,13 @@ function showModal(type){
       </div>
     </div>
     <div id="planFeatureBox" style="background:var(--gray-l);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--navy);line-height:1.8"></div>
-    <button id="stripeCheckoutBtn" class="btn btn-gold btn-block" onclick="startStripeCheckout()" style="font-size:15px;padding:15px">
-      🌐 ${L('Đăng ký trên Web →','Webサイトで登録する →')}
+    <button id="stripeCheckoutBtn" class="btn btn-gold btn-block" onclick="startCheckout()" style="font-size:15px;padding:15px">
+      ${IS_NATIVE_APP?'🍎 '+L('Mua ngay →','購入する →'):'🌐 '+L('Đăng ký trên Web →','Webサイトで登録する →')}
     </button>
     <div style="text-align:center;font-size:11px;color:var(--tan);margin-top:10px">
-      🔒 ${L('Thanh toán an toàn qua nihongo-app-orcin.vercel.app','nihongo-app-orcin.vercel.appで安全に決済')}
-    </div>`;
+      ${IS_NATIVE_APP?'🔒 '+L('Thanh toán an toàn qua App Store','App Storeで安全に決済'):'🔒 '+L('Thanh toán an toàn qua nihongo-app-orcin.vercel.app','nihongo-app-orcin.vercel.appで安全に決済')}
+    </div>
+    ${IS_NATIVE_APP?'<div style="text-align:center;margin-top:8px"><span onclick="restoreNativePurchases()" style="font-size:12px;color:var(--red);cursor:pointer;text-decoration:underline">'+L('Khôi phục giao dịch mua','購入を復元')+'</span></div>':''}`;
     selectPlan(_pre);
   }else if(type==='compose'){
     box.innerHTML=`<div class="modal-handle"></div><div class="modal-title">✏️ ${L('Đăng bài tiếng Nhật','日本語で投稿')}</div>
@@ -8618,6 +8620,141 @@ function startStripeCheckout(){
     if(btn){ btn.disabled=false; btn.textContent='🌐 '+L('Đăng ký trên Web →','Webサイトで登録する →'); }
   });
 }
+
+/* ════ ネイティブアプリ内課金 (StoreKit2 / @capgo/native-purchases、Guideline 3.1.1対応) ════ */
+var IAP_PRODUCT_IDS = { ume:'com.nihongoreal.app.sub.ume', take:'com.nihongoreal.app.sub.take', matsu:'com.nihongoreal.app.sub.matsu' };
+
+function getNativePurchasesPlugin(){
+  try{
+    var C = window.Capacitor;
+    if(!C) return null;
+    if(C.Plugins && C.Plugins.NativePurchases) return C.Plugins.NativePurchases;
+    if(typeof C.registerPlugin === 'function') return C.registerPlugin('NativePurchases');
+  }catch(e){}
+  return null;
+}
+
+/* Web/ネイティブを自動判定する購入エントリーポイント。支払いモーダルのボタンはすべてこれを呼ぶ */
+function startCheckout(planOverride){
+  var plan = planOverride || window._selectedPlan || 'take';
+  window._selectedPlan = plan;
+  if(IS_NATIVE_APP){ startNativeIAPPurchase(plan); }
+  else { startStripeCheckout(); }
+}
+
+function startNativeIAPPurchase(plan){
+  if(!currentUser){
+    closeModal();
+    showModal('login');
+    showToast(L('Vui lòng đăng nhập trước','まずログインしてください'));
+    return;
+  }
+  var productId = IAP_PRODUCT_IDS[plan];
+  var NP = getNativePurchasesPlugin();
+  var btn=document.getElementById('stripeCheckoutBtn');
+  if(!productId || !NP){
+    showToast(L('Mua hàng không khả dụng trên thiết bị này','この端末では購入機能を利用できません'));
+    return;
+  }
+  if(btn){ btn.disabled=true; btn.textContent='...'; }
+
+  NP.purchaseProduct({ productIdentifier: productId, productType: 'subs' }).then(function(result){
+    var tx = (result && result.transaction) ? result.transaction : result; // プラグインのバージョン差異を吸収
+    return currentUser.getIdToken().then(function(idToken){
+      return fetch(VERCEL_API_URL+'/api/verify-iap',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+        body: JSON.stringify({
+          plan: plan,
+          transactionId: tx && tx.transactionId,
+          jwsRepresentation: tx && tx.jwsRepresentation
+        })
+      });
+    }).then(function(r){ return r.json(); });
+  }).then(function(data){
+    if(data && data.success){
+      window._lastUserPlan = plan;
+      if(typeof _applyPremiumUI==='function') _applyPremiumUI();
+      closeModal();
+      showToast(L('Đăng ký Premium thành công! 🎉','Premium登録が完了しました！🎉'), 5000);
+    } else {
+      showToast(L('Không thể xác thực giao dịch. Vui lòng thử lại sau.','購入の確認に失敗しました。しばらくしてから再度お試しください'));
+    }
+  }).catch(function(e){
+    console.error('Native IAP purchase error:', e);
+    var msg = String((e && (e.message||e.code)) || '');
+    if(/cancel/i.test(msg)) return; // ユーザーによるキャンセルは無視
+    showToast(L('Mua hàng thất bại','購入に失敗しました'));
+  }).finally(function(){
+    if(btn){ btn.disabled=false; btn.textContent='🍎 '+L('Mua ngay →','購入する →'); }
+  });
+}
+
+/* App Store審査ガイドライン3.1.1準拠: 購入の復元ボタン */
+function restoreNativePurchases(){
+  var NP = getNativePurchasesPlugin();
+  if(!NP){ showToast(L('Không khả dụng','利用できません')); return; }
+  if(!currentUser){
+    closeModal(); showModal('login');
+    showToast(L('Vui lòng đăng nhập trước','まずログインしてください'));
+    return;
+  }
+  showToast(L('Đang khôi phục...','復元中...'));
+  NP.restorePurchases().then(function(){
+    return NP.getPurchases({ productType:'subs', onlyCurrentEntitlements:true });
+  }).then(function(res){
+    var purchases = (res && res.purchases) || [];
+    var active = purchases.filter(function(p){ return p && p.isActive!==false; });
+    if(active.length===0){
+      showToast(L('Không tìm thấy giao dịch mua nào','有効な購入が見つかりませんでした'));
+      return;
+    }
+    var rankMap={ume:1,take:2,matsu:3};
+    var best=null;
+    active.forEach(function(p){
+      var plan=Object.keys(IAP_PRODUCT_IDS).find(function(k){ return IAP_PRODUCT_IDS[k]===p.productIdentifier; });
+      if(plan && (!best || rankMap[plan]>rankMap[best.plan])) best={plan:plan, tx:p};
+    });
+    if(!best){ showToast(L('Không tìm thấy giao dịch phù hợp','対応する購入が見つかりませんでした')); return; }
+    return currentUser.getIdToken().then(function(idToken){
+      return fetch(VERCEL_API_URL+'/api/verify-iap',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+        body: JSON.stringify({ plan:best.plan, transactionId:best.tx.transactionId, jwsRepresentation:best.tx.jwsRepresentation })
+      });
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data && data.success){
+        window._lastUserPlan = best.plan;
+        if(typeof _applyPremiumUI==='function') _applyPremiumUI();
+        closeModal();
+        showToast(L('Khôi phục thành công! 🎉','復元が完了しました！🎉'), 4000);
+      } else {
+        showToast(L('Khôi phục thất bại','復元に失敗しました'));
+      }
+    });
+  }).catch(function(e){
+    console.error('Restore purchases error:', e);
+    showToast(L('Khôi phục thất bại','復元に失敗しました'));
+  });
+}
+
+/* アプリ起動時: 既存の有効なサブスクリプションがあればサイレントに同期を試みる */
+(function(){
+  if(!IS_NATIVE_APP) return;
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      try{
+        if(!currentUser) return;
+        var NP = getNativePurchasesPlugin();
+        if(!NP || !NP.getPurchases) return;
+        NP.getPurchases({ productType:'subs', onlyCurrentEntitlements:true }).then(function(res){
+          var purchases=(res && res.purchases)||[];
+          if(purchases.length>0 && typeof restoreNativePurchases==='function') restoreNativePurchases();
+        }).catch(function(){});
+      }catch(e){}
+    }, 3000);
+  });
+})();
 
 
 // 決済成功後のURLパラメータを確認

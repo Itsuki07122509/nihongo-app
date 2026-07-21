@@ -3,5 +3,10 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/((?!privacy|terms).*)", "destination": "/NihonGo_App.html" }
-  ]
+  ],
+  "functions": {
+    "api/verify-iap.js": {
+      "includeFiles": "api/certs/**"
+    }
+  }
 }
