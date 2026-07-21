@@ -8833,17 +8833,21 @@ async function cancelPremium(){
 
 function renderSpecialPage(){
   var prem=isPremiumUser;
+  var plan=getUserPlan();
   var sub=document.getElementById('hubSubtitle');
-  if(sub) sub.textContent=prem?'Tất cả tính năng đã được mở khóa ✅':'Đăng ký Premium để mở khóa tất cả';
+  if(sub) sub.textContent = !prem ? 'Đăng ký Premium để mở khóa tất cả'
+    : (plan==='take'||plan==='matsu') ? 'Tất cả tính năng đã được mở khóa ✅'
+    : 'Một số tính năng đã được mở khóa（UME）✅';
   var nb=document.getElementById('hubNotPremium');
   if(nb) nb.style.display=prem?'none':'block';
-  // ロックアイコン更新（プレミアムhub + 学習タブの両方）
+  // ロックアイコン更新（プレミアムhub + 学習タブの両方、プランごとに解放範囲を区別）
   var ids=['friend','love','keigo','rirekisho','matsuri','slang'];
   ids.forEach(function(id){
+    var unlocked=hubContentUnlocked(id);
     var el=document.getElementById('lock-'+id);
-    if(el) el.textContent=prem?'✅':'🔒';
+    if(el) el.textContent=unlocked?'✅':'🔒';
     var el2=document.getElementById('learnLock-'+id);
-    if(el2) el2.textContent=prem?'✅':'🔒';
+    if(el2) el2.textContent=unlocked?'✅':'🔒';
   });
   // 星アニメーション
   var stars=document.getElementById('hubStars');
@@ -13392,7 +13396,11 @@ var _slideState={courseId:null,idx:0};
 
 function hubCard(courseId){
   if(requireLoginAction())return;
-  if(!isPremiumUser){ showModal('payment'); return; }
+  if(!hubContentUnlocked(courseId)){
+    window._preselectPlan = HUB_CONTENT_REQUIRED_PLAN[courseId] || 'take';
+    showModal('payment');
+    return;
+  }
   startSlideLesson(courseId);
 }
 
@@ -13497,7 +13505,7 @@ function renderSlide(){
   /* ── 全体HTML ── */
   ov.innerHTML=
     /* TOP BAR */
-    '<div style="position:sticky;top:0;z-index:10;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid #F0F0F0;padding:8px 14px">'
+    '<div style="position:sticky;top:0;z-index:10;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid #F0F0F0;padding:'+(typeof IS_NATIVE_APP!=='undefined'&&IS_NATIVE_APP?'calc(max(env(safe-area-inset-top),47px) - 8px) 14px 8px':'8px 14px')+'">'
     +'<div style="display:flex;align-items:center;gap:10px">'
     +'<button onclick="hubBack()" style="background:#F5F5F5;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;color:#666;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;touch-action:manipulation;flex-shrink:0">✕</button>'
     +'<div style="flex:1;height:6px;background:#F0F0F0;border-radius:3px;overflow:hidden">'
@@ -16856,6 +16864,14 @@ function isMatsuPremium(){ return getUserPlan() === 'matsu'; }
 function hasBonusPerks(){ return isMatsuPremium(); } // MATSU限定特典（限定コンテンツ・新機能先行体験）
 function isAnyPremium(){ return getUserPlan() !== 'free'; }
 
+/* ── プラン別コンテンツ解放（UME/TAKE/MATSUで解放範囲を区別） ── */
+var PLAN_RANK_CLIENT={free:0, ume:1, take:2, matsu:3};
+var HUB_CONTENT_REQUIRED_PLAN={friend:'ume', love:'ume', matsuri:'ume', keigo:'take', rirekisho:'take', slang:'take'};
+function hubContentUnlocked(id){
+  var need=PLAN_RANK_CLIENT[HUB_CONTENT_REQUIRED_PLAN[id]||'take']||2;
+  return (PLAN_RANK_CLIENT[getUserPlan()]||0) >= need;
+}
+
 // Premium判定後にプランを設定するフック
 var _origApplyPremiumUI_plan = window._applyPremiumUI;
 window._applyPremiumUI = function(){
@@ -16890,8 +16906,16 @@ window.unifyAccountByEmail = async function(){
         } else {
           window._lastUserPlan = 'free';
         }
+      } else {
+        window._lastUserPlan = 'free';
       }
     }
+  }catch(e){}
+  // 正しいplanが判明したので再適用し、すでに描画済みのUI（Hub/プロフィール等）も更新する
+  try{
+    if(typeof window._applyPremiumUI==='function') window._applyPremiumUI();
+    if(typeof renderSpecialPage==='function') renderSpecialPage();
+    if(typeof refreshProfilePage==='function') refreshProfilePage();
   }catch(e){}
   return r;
 };
