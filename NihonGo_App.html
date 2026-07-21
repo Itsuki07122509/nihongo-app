@@ -17122,10 +17122,9 @@ window._applyPremiumUI = function(){
 </script>
 
 <!-- ═══════════ Capacitorネイティブアプリ用パッチ（App Store Guideline 3.1.1対策） ═══════════ -->
+<!-- 注: 課金モーダルのブロックは撤去済み（StoreKit2ネイティブ課金を実装したため、showModal('payment')は
+     通常どおり開き、startCheckout()がIS_NATIVE_APPを見てネイティブ購入フローに分岐する） -->
 <style>
-body.native-app [onclick*="openPaymentModal"],
-body.native-app [onclick*="startStripeCheckout"],
-body.native-app .premium-price-glow,
 body.native-app .app-hide{display:none!important}
 /* セーフエリア調整（iOSステータスバー・時計との重なり対策） */
 body.native-app .topnav{top:calc(max(env(safe-area-inset-top),47px) - 8px)!important}
@@ -17139,23 +17138,6 @@ body.native-app .bnav{padding-bottom:max(env(safe-area-inset-bottom),16px)!impor
   var isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) || window.location.protocol === 'capacitor:';
   if(!isNative) return;
   document.body.classList.add('native-app');
-
-  // 課金モーダルを完全ブロック（既存のshowModalオーバーライドの後に実行されるためlogin/register分岐は維持）
-  var _prevShowModal = window.showModal;
-  window.showModal = function(type){
-    if(type === 'payment'){
-      var msg = (typeof L === 'function')
-        ? L('Tính năng này không khả dụng trong phiên bản này','この機能は現在のバージョンではご利用いただけません')
-        : 'この機能は現在のバージョンではご利用いただけません';
-      if(typeof showToast === 'function') showToast(msg, 3000);
-      return;
-    }
-    return _prevShowModal.apply(this, arguments);
-  };
-
-  // 念のためStripe Checkoutも無効化（防御の多層化）
-  window.startStripeCheckout = function(){};
-  window.openPaymentModal = function(){ window.showModal('payment'); };
 })();
 </script>
 </body>
