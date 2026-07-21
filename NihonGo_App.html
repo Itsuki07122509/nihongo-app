@@ -16401,9 +16401,7 @@ function _renderAdminSearchResults(q){
         +'<div style="font-size:10px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.email||'')+'</div>'
         +'<div style="font-size:9px;color:#C4C4C4;font-family:monospace">'+u.id+'</div>'
         +'</div>'
-        +(isP
-          ? '<button onclick="adminSetPremium(\''+u.id+'\',false,\''+name.replace(/'/g,'')+'\')" style="background:#FEE2E2;color:#991B1B;border:none;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;touch-action:manipulation">解除</button>'
-          : '<button onclick="adminSetPremium(\''+u.id+'\',true,\''+name.replace(/'/g,'')+'\')" style="background:linear-gradient(135deg,#FFD700,#F59E0B);color:#5C3A00;border:none;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0;touch-action:manipulation">⭐ 付与</button>')
+        +adminPlanButtonsHTML(u.id, isP, d.premiumPlan)
         +'</div>';
     }).join('');
 }
